@@ -129,8 +129,8 @@ public class PdfUtils {
         return pageText.contains(phrase);
     }
 
-    public boolean containsTextInFile(PDDocument pdfDocument, String text, String pagesToCheck)
-            throws IOException {
+    public static boolean containsTextInFile(
+            PDDocument pdfDocument, String text, String pagesToCheck) throws IOException {
         PDFTextStripper textStripper = new PDFTextStripper();
         String pdfText = "";
 
@@ -168,7 +168,7 @@ public class PdfUtils {
         return pdfText.contains(text);
     }
 
-    public boolean pageCount(PDDocument pdfDocument, int pageCount, String comparator)
+    public static boolean pageCount(PDDocument pdfDocument, int pageCount, String comparator)
             throws IOException {
         int actualPageCount = pdfDocument.getNumberOfPages();
         pdfDocument.close();
@@ -186,7 +186,8 @@ public class PdfUtils {
         }
     }
 
-    public boolean pageSize(PDDocument pdfDocument, String expectedPageSize) throws IOException {
+    public static boolean pageSize(PDDocument pdfDocument, String expectedPageSize)
+            throws IOException {
         PDPage firstPage = pdfDocument.getPage(0);
         PDRectangle mediaBox = firstPage.getMediaBox();
 
