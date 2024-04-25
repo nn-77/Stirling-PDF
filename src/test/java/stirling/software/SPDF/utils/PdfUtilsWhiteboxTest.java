@@ -9,6 +9,7 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.rendering.ImageType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -24,12 +25,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.*;
-import java.nio.Buffer;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.zip.ZipInputStream;
 
-public class PdfUtilsTest {
+public class PdfUtilsWhiteboxTest {
     private static boolean imageEquals(BufferedImage a, BufferedImage b) {
         // The images must be the same size.
         if (a.getWidth() != b.getWidth() || a.getHeight() != b.getHeight()) {
@@ -52,7 +52,7 @@ public class PdfUtilsTest {
         return true;
     }
 
-    private static Stream<Arguments> getTextAndRectangle() {
+    private static Stream<Arguments> provideTextAndRectangle() {
         return Stream.of(
                 Arguments.of("A0", PDRectangle.A0),
                 Arguments.of("A1", PDRectangle.A1),
@@ -93,7 +93,7 @@ public class PdfUtilsTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getTextAndRectangle")
+    @MethodSource("provideTextAndRectangle")
     void testTextToPageSizeSuccess(String size, PDRectangle rect) {
         assertEquals(rect, PdfUtils.textToPageSize(size));
     }
@@ -485,6 +485,7 @@ public class PdfUtilsTest {
         // This is a semi-fault. Unfortunately, we can't really perform easy assertions on the "black/whiteness" of the generated PDF.
         // While the image is converted to black and white, the image type is BYTE_GREY, so it appears the image properties
         // are not preserved in the conversion. However, the generated pdf can be manually inspected to be correctly black and white
+        @Tag("fails")
         @Test
         public void testTIFToPdfBlackWhite() {
             // with autoRotate = true
@@ -509,6 +510,7 @@ public class PdfUtilsTest {
         }
 
         // Same as above, except the type is regular RGB.
+        @Tag("fails")
         @Test
         public void testTIFFToPdfGreyscale() {
             try {
@@ -573,6 +575,7 @@ public class PdfUtilsTest {
         // regular LossLessFactory may be more reliable than JPEGFactory for jpegs...
         // We consider this another "semi-fault". There is likely some loss in the JPEG conversion, but it seems
         // too minuscule to be considered practically relevant, by the manual inspection.
+        @Tag("fails")
         @Test
         public void testJPEGToPdf() {
             try {
@@ -685,6 +688,7 @@ public class PdfUtilsTest {
             }
         }
 
+        @Tag("fails")
         @Test
         // This is a fault. It should throw an IO exception, as document, for some invalid input
         public void testInvalidInput() {
