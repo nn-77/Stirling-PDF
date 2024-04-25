@@ -315,10 +315,4 @@ public class GeneralUtilsTest {
             assertEquals(expected, GeneralUtils.parsePageList(input, totalPages, oneBased));
         }
     }
-
-
-    @Nested
-    class Functions{
-
-    }
 }

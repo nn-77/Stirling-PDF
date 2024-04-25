@@ -39,8 +39,6 @@ public class TestingUtils {
     }
 
     public static boolean areImagesEqual(RenderedImage img1, RenderedImage img2) {
-        // A simple pixel comparison could be performed here
-        // For brevity, we compare dimensions; more thorough checks might involve pixel-by-pixel comparison
         return img1.getWidth() == img2.getWidth() && img1.getHeight() == img2.getHeight();
     }
 
@@ -97,7 +95,7 @@ public class TestingUtils {
     public static PDResources createResourcesWithOneImage() throws IOException {
         PDDocument doc = new PDDocument();
         PDResources resources = new PDResources();
-        PDImageXObject img = PDImageXObject.createFromFile("testFiles/blue.png", doc);
+        PDImageXObject img = PDImageXObject.createFromFile("testFiles/inputs/blue.png", doc);
         resources.put(COSName.getPDFName("Img1"), img);
         return resources;
     }
@@ -105,9 +103,9 @@ public class TestingUtils {
     public static PDResources createResourcesWithTwoImages() throws IOException {
         PDDocument doc = new PDDocument();
         PDResources resources = new PDResources();
-        PDImageXObject img = PDImageXObject.createFromFile("testFiles/blue.png", doc);
+        PDImageXObject img = PDImageXObject.createFromFile("testFiles/inputs/blue.png", doc);
         resources.put(COSName.getPDFName("Img1"), img);
-        PDImageXObject img2 = PDImageXObject.createFromFile("testFiles/blue.png", doc);
+        PDImageXObject img2 = PDImageXObject.createFromFile("testFiles/inputs/blue.png", doc);
         resources.put(COSName.getPDFName("Img2"), img2);
         return resources;
     }
@@ -127,17 +125,17 @@ public class TestingUtils {
 
     public static PDDocument createDocumentWithImagesOnMiddlePages() throws IOException {
         PDDocument doc = new PDDocument();
-        doc.addPage(new PDPage());  // First page - no image
-        addImageToPage(doc, new PDPage());  // Middle page with image
-        addImageToPage(doc, new PDPage());  // Another middle page with image
-        doc.addPage(new PDPage());  // Last page - no image
+        doc.addPage(new PDPage());  // First page no image
+        addImageToPage(doc, new PDPage());  // Middle page image
+        addImageToPage(doc, new PDPage());  // Another middle page image
+        doc.addPage(new PDPage());  // Last page no image
         return doc;
     }
 
     public static PDDocument createDocumentWithImagesOnLastPage() throws IOException {
         PDDocument doc = new PDDocument();
-        doc.addPage(new PDPage());  // First page - no image
-        doc.addPage(new PDPage());  // Middle page - no image
+        doc.addPage(new PDPage());  // First page no image
+        doc.addPage(new PDPage());  // Middle page no image
         addImageToPage(doc, new PDPage());  // Last page with image
         return doc;
     }
@@ -158,8 +156,8 @@ public class TestingUtils {
     public static PDDocument createDocumentWithTextOnMiddlePages() throws IOException {
         PDDocument doc = new PDDocument();
         doc.addPage(new PDPage());  // First page - no text
-        addTextToPage(doc, new PDPage(), "Sample Text");  // Middle page with text
-        addTextToPage(doc, new PDPage(), "Sample Text");  // Another middle page with text
+        addTextToPage(doc, new PDPage(), "Sample Text");  // Middle page w text
+        addTextToPage(doc, new PDPage(), "Sample Text");  // Another middle page w text
         return doc;
     }
 
@@ -168,19 +166,19 @@ public class TestingUtils {
         for (int i = 0; i < totalPages - 1; i++) {
             doc.addPage(new PDPage());  // Add blank pages
         }
-        addTextToPage(doc, new PDPage(), "Sample Text");  // Last page with text
+        addTextToPage(doc, new PDPage(), "Sample Text");  // Last page w text
         return doc;
     }
 
 
     public static PDPage createPageWithNoResources() {
-        return new PDPage(); // A new page without any set resources
+        return new PDPage();
     }
 
     public static PDPage createPageWithResourcesButNoImages() {
         PDPage page = new PDPage();
         PDResources resources = new PDResources();
-        page.setResources(resources); // Resources are set, but no images are included
+        page.setResources(resources); // no images included
         return page;
     }
 
@@ -190,7 +188,7 @@ public class TestingUtils {
             PDPage page = new PDPage();
             PDResources resources = new PDResources();
 
-            PDImageXObject image = PDImageXObject.createFromFile("testFiles/blue.png", doc);
+            PDImageXObject image = PDImageXObject.createFromFile("testFiles/inputs/blue.png", doc);
             resources.put(COSName.getPDFName("Img1"), image);
 
             page.setResources(resources);
@@ -208,8 +206,8 @@ public class TestingUtils {
             PDPage page = new PDPage();
             PDResources resources = new PDResources();
 
-            PDImageXObject image1 = PDImageXObject.createFromFile("testFiles/blue.png", doc);
-            PDImageXObject image2 = PDImageXObject.createFromFile("testFiles/blue.png", doc);
+            PDImageXObject image1 = PDImageXObject.createFromFile("testFiles/inputs/blue.png", doc);
+            PDImageXObject image2 = PDImageXObject.createFromFile("testFiles/inputs/blue.png", doc);
             resources.put(COSName.getPDFName("Img1"), image1);
             resources.put(COSName.getPDFName("Img2"), image2);
 
@@ -223,7 +221,7 @@ public class TestingUtils {
     }
 
     public static PDPage createPageWithNoText() {
-        return new PDPage(); // Empty page
+        return new PDPage();
     }
 
     public static PDDocument createDocumentWithPages(int numPages) throws IOException {
@@ -264,12 +262,6 @@ public class TestingUtils {
     public static byte[] createSamplePdf() {
         return "%PDF-1.4".getBytes();
     }
-
-    public static byte[] generateLargeFileContent() {
-        return new byte[1024 * 1024];
-    }
-
-
 
 
 }

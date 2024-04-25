@@ -43,21 +43,20 @@ public class PdfUtilsTest {
     private static PDDocument txtOnly;
     private static PDDocument multiPage;
     private static PDDocument empty;
-    private static final String conversionPath = "testFiles/converted/";
 
     private static byte[] imageBytes;
 
     @BeforeAll
     public static void setup() {
         try {
-            txtAndImg = Loader.loadPDF(new File("testFiles/txtAndImg.pdf"));
-            imgOnly = Loader.loadPDF(new File("testFiles/imgOnly.pdf"));
-            txtOnly = Loader.loadPDF(new File("testFiles/txtOnly.pdf"));
-            multiPage = Loader.loadPDF(new File("testFiles/multiPage.pdf"));
-            empty = Loader.loadPDF(new File("testFiles/empty.pdf"));
+            txtAndImg = Loader.loadPDF(new File("testFiles/inputs/txtAndImg.pdf"));
+            imgOnly = Loader.loadPDF(new File("testFiles/inputs/imgOnly.pdf"));
+            txtOnly = Loader.loadPDF(new File("testFiles/inputs/txtOnly.pdf"));
+            multiPage = Loader.loadPDF(new File("testFiles/inputs/multiPage.pdf"));
+            empty = Loader.loadPDF(new File("testFiles/inputs/empty.pdf"));
 
             try (PDDocument doc = new PDDocument()) {
-                PDImageXObject image1 = PDImageXObject.createFromFile("testFiles/blue.png", doc);
+                PDImageXObject image1 = PDImageXObject.createFromFile("testFiles/inputs/blue.png", doc);
                 BufferedImage bufferedImage = image1.getImage();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ImageIO.write(bufferedImage, "png", baos);
@@ -197,13 +196,6 @@ public class PdfUtilsTest {
                 Assertions.fail("Exception should not be thrown: " + ex.toString());
             }
         }
-
-
-
-
-
-
-
    }
 
    @Nested
@@ -216,11 +208,11 @@ public class PdfUtilsTest {
        // pdf(with more than 1 page) with text only on last page
        public static Stream<Arguments> textDocumentProvider() throws IOException {
            return Stream.of(
-                   Arguments.of(createDocumentWithNoText(), "1", "Sample Text", false),  // PDF with no text
-                   Arguments.of(createDocumentWithTextOnFirstPage(), "1", "Sample Text", true),  // PDF with text only on the 1st page
-                   Arguments.of(createDocumentWithTextOnMiddlePages(), "2,3", "Sample Text", true),  // PDF with text on middle pages
-                   Arguments.of(createDocumentWithTextOnLastPage(3), "3", "Sample Text", true),  // PDF with text only on the last page
-                   Arguments.of(createDocumentWithTextOnLastPage(3), "1,2", "Sample Text", false)  // Check other pages for absence
+                   Arguments.of(createDocumentWithNoText(), "1", "Sample Text", false),
+                   Arguments.of(createDocumentWithTextOnFirstPage(), "1", "Sample Text", true),
+                   Arguments.of(createDocumentWithTextOnMiddlePages(), "2,3", "Sample Text", true),
+                   Arguments.of(createDocumentWithTextOnLastPage(3), "3", "Sample Text", true),
+                   Arguments.of(createDocumentWithTextOnLastPage(3), "1,2", "Sample Text", false)
            );
        }
        @ParameterizedTest
@@ -275,7 +267,7 @@ public class PdfUtilsTest {
                boolean result = PdfUtils.containsTextInFile(document, text, pagesToCheck);
                Assertions.assertEquals(expected, result, "Text detection mismatch.");
            } finally {
-               document.close(); // Ensure document is closed after test
+               document.close(); // doc closed after test
            }
        }
    }
@@ -306,7 +298,7 @@ public class PdfUtilsTest {
                Assertions.assertEquals(expected, result, "Page count comparison did not yield the expected result.");
            } finally {
                if (document != null) {
-                   document.close(); // Ensure the document is closed after each test
+                   document.close();
                }
            }
        }
@@ -345,11 +337,11 @@ public class PdfUtilsTest {
    @Nested
     class Conversions {
        public static Stream<Arguments> pdfConversionProvider() throws IOException {
-           byte[] txtAndImgPdf = loadPdfAsByteArray("testFiles/txtAndImg.pdf");
-           byte[] imgOnlyPdf = loadPdfAsByteArray("testFiles/imgOnly.pdf");
-           byte[] multiPagePdf = loadPdfAsByteArray("testFiles/multiPage.pdf");
-           byte[] emptyPdf = loadPdfAsByteArray("testFiles/empty.pdf");
-           byte[] txtPdf = loadPdfAsByteArray("testFiles/empty.pdf");
+           byte[] txtAndImgPdf = loadPdfAsByteArray("testFiles/inputs/txtAndImg.pdf");
+           byte[] imgOnlyPdf = loadPdfAsByteArray("testFiles/inputs/imgOnly.pdf");
+           byte[] multiPagePdf = loadPdfAsByteArray("testFiles/inputs/multiPage.pdf");
+           byte[] emptyPdf = loadPdfAsByteArray("testFiles/inputs/empty.pdf");
+           byte[] txtPdf = loadPdfAsByteArray("testFiles/inputs/empty.pdf");
 
            return Stream.of(
                    Arguments.of(txtAndImgPdf, "tiff", ImageType.RGB, true, 300, "singlePageTiff"),
