@@ -1,8 +1,7 @@
-package stirling.software.SPDF.utils.blackbox;
+package stirling.software.SPDF.utils;
 
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.io.RandomAccessRead;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
@@ -15,29 +14,24 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static stirling.software.SPDF.utils.blackbox.TestingUtils.*;
+import static stirling.software.SPDF.utils.TestingUtils.*;
 
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-import org.apache.pdfbox.io.MemoryUsageSetting;
-
-import stirling.software.SPDF.utils.PdfUtils;
 
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.*;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import java.io.IOException;
-import java.io.ByteArrayInputStream;
 import java.util.stream.StreamSupport;
 
-public class PdfUtilsTest {
+public class PdfUtilsBlackboxTest {
     private static PDDocument txtAndImg;
     private static PDDocument imgOnly;
     private static PDDocument txtOnly;
@@ -127,12 +121,12 @@ public class PdfUtilsTest {
         void testGetAllImages(PDResources resources, int numImages) {
             try {
                 List<RenderedImage> images = PdfUtils.getAllImages(resources);
-                Assertions.assertEquals(numImages, images.size(), "The number of images returned is not as expected");
+                Assertions.assertEquals(numImages, images.size(), "Number of images not as expected");
 
                 Map<COSName, RenderedImage> originalImages = extractImagesFromResources(resources);
                 for (RenderedImage original : originalImages.values()) {
                     boolean found = images.stream().anyMatch(image -> areImagesEqual(image, original));
-                    Assertions.assertTrue(found, "An expected image was not found in the returned images");
+                    Assertions.assertTrue(found, "An expected image not found in result");
                 }
             } catch (IOException ex) {
                 Assertions.fail("Exception should not be thrown: " + ex.toString());
@@ -161,7 +155,7 @@ public class PdfUtilsTest {
         void testHasImages(PDDocument document, String pagesToCheck, boolean expected) throws IOException {
             try {
                 boolean hasImages = PdfUtils.hasImages(document, pagesToCheck);
-                Assertions.assertEquals(expected, hasImages, "The presence of images did not match expectations.");
+                Assertions.assertEquals(expected, hasImages, "Expected images were not found");
             } finally {
                 if (document != null) {
                     document.close();
@@ -191,7 +185,7 @@ public class PdfUtilsTest {
         void testHasImagesOnPage(PDPage page, boolean expected) {
             try {
                 boolean hasImages = PdfUtils.hasImagesOnPage(page);
-                Assertions.assertEquals(expected, hasImages, "The detection of images on the page did not match expectations.");
+                Assertions.assertEquals(expected, hasImages, "Expected images were not found");
             } catch (IOException ex) {
                 Assertions.fail("Exception should not be thrown: " + ex.toString());
             }
@@ -220,7 +214,7 @@ public class PdfUtilsTest {
        void testHasText(PDDocument document, String pagesToCheck, String phrase, boolean expected) throws IOException {
            try {
                boolean hasText = PdfUtils.hasText(document, pagesToCheck, phrase);
-               Assertions.assertEquals(expected, hasText, "The detection of text did not match expectations.");
+               Assertions.assertEquals(expected, hasText, "Expected text not found");
            } finally {
                if (document != null) {
                    document.close();
@@ -245,7 +239,7 @@ public class PdfUtilsTest {
        void testHasTextOnPage(PDPage page, String phrase, boolean expected) throws IOException {
 
            boolean hasText = PdfUtils.hasTextOnPage(page, phrase);
-           Assertions.assertEquals(expected, hasText, "The detection of text on the page did not match expectations.");
+           Assertions.assertEquals(expected, hasText, "Expected text not found");
        }
 
 
@@ -295,7 +289,7 @@ public class PdfUtilsTest {
        void testPageCount(PDDocument document, int pageCount, String comparator, boolean expected) throws IOException {
            try {
                boolean result = PdfUtils.pageCount(document, pageCount, comparator);
-               Assertions.assertEquals(expected, result, "Page count comparison did not yield the expected result.");
+               Assertions.assertEquals(expected, result, "Page count returned not as expected");
            } finally {
                if (document != null) {
                    document.close();
@@ -325,7 +319,7 @@ public class PdfUtilsTest {
        void testPageSize(PDDocument document, String expectedPageSize, boolean expected) throws IOException {
            try {
                boolean matches = PdfUtils.pageSize(document, expectedPageSize);
-               Assertions.assertEquals(expected, matches, "Page size comparison did not yield the expected result.");
+               Assertions.assertEquals(expected, matches, "Page size not as expected");
            } finally {
                if (document != null) {
                    document.close();
@@ -380,8 +374,8 @@ public class PdfUtilsTest {
        @MethodSource("pdfConversionProvider")
        void testConvertFromPdf(byte[] pdfData, String imageType, ImageType colorType, boolean singleImage, int DPI, String filename) throws IOException, Exception {
            byte[] result = PdfUtils.convertFromPdf(pdfData, imageType, colorType, singleImage, DPI, filename);
-           Assertions.assertNotNull(result, "The conversion should produce some output.");
-           Assertions.assertTrue(result.length > 0, "The output should not be empty.");
+           Assertions.assertNotNull(result, "Conversion should produce some output.");
+           Assertions.assertTrue(result.length > 0, "Output should not be empty.");
        }
 
 
@@ -412,7 +406,7 @@ public class PdfUtilsTest {
            try (PDDocument doc = Loader.loadPDF(actualOutput)) {
 
                int expectedPageCount = files.length;
-               Assertions.assertEquals(expectedPageCount, doc.getNumberOfPages(), "The document does not have the expected number of pages.");
+               Assertions.assertEquals(expectedPageCount, doc.getNumberOfPages(), "Document does not have the expected number of pages.");
 
                for (int i = 0; i < doc.getNumberOfPages()-1; i++) {
                    PDPage page = doc.getPage(i);

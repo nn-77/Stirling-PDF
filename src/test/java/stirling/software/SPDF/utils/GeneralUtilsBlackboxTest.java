@@ -1,4 +1,4 @@
-package stirling.software.SPDF.utils.blackbox;
+package stirling.software.SPDF.utils;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -11,7 +11,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-import stirling.software.SPDF.utils.GeneralUtils;
+
 import java.util.List;
 
 import java.io.*;
@@ -22,20 +22,16 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
-import static stirling.software.SPDF.utils.blackbox.TestingUtils.*;
+import static stirling.software.SPDF.utils.TestingUtils.*;
 
 import org.junit.jupiter.api.AfterEach;
 import java.nio.file.*;
-import java.util.stream.Stream;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
-import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
-public class GeneralUtilsTest {
+public class GeneralUtilsBlackboxTest {
 
     @Nested
     class FilesAndDirs {
@@ -96,7 +92,7 @@ public class GeneralUtilsTest {
                 Files.createDirectories(link.getParent());
                 Files.createSymbolicLink(link, linkTarget);
             } catch (UnsupportedOperationException | IOException e) {
-                System.err.println("Symbolic links are not supported in this environment or an error occurred: " + e.getMessage());
+                System.err.println("Error with symbolic linkss: " + e.getMessage());
             }
         }
 
@@ -196,7 +192,7 @@ public class GeneralUtilsTest {
                 given(multipartFile.getInputStream()).willReturn(new ByteArrayInputStream(content));
                 given(multipartFile.getSize()).willReturn((long) content.length);
             } catch (IOException e) {
-                fail("Mock setup failed");
+                fail("error setting up mock");
             }
             return multipartFile;
         }
@@ -216,10 +212,10 @@ public class GeneralUtilsTest {
         void testMultipartToFile(MultipartFile multipartFile) throws IOException {
             File convertedFile = GeneralUtils.multipartToFile(multipartFile);
 
-            assertNotNull(convertedFile, "The converted file should not be null.");
-            assertTrue(convertedFile.exists(), "The converted file should exist.");
-            assertEquals(multipartFile.getSize(), convertedFile.length(), "The file size should match the input multipart file size.");
-            assertTrue(convertedFile.delete(), "Failed to delete the temporary file.");
+            assertNotNull(convertedFile, "Converted file should not be null.");
+            assertTrue(convertedFile.exists(), "Converted file should exist.");
+            assertEquals(multipartFile.getSize(), convertedFile.length(), "File size doesnt match input size");
+            assertTrue(convertedFile.delete(), "Temp file not deleted.");
         }
 
 

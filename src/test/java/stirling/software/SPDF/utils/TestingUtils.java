@@ -1,4 +1,4 @@
-package stirling.software.SPDF.utils.blackbox;
+package stirling.software.SPDF.utils;
 
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSName;

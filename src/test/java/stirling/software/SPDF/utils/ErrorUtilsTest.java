@@ -1,4 +1,4 @@
-package stirling.software.SPDF.utils.blackbox;
+package stirling.software.SPDF.utils;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
