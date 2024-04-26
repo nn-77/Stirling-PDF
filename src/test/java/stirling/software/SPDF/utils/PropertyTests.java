@@ -56,7 +56,6 @@ public class PropertyTests {
     }
 
     //checks property that when img1->pdf->img2 then ideally img1=img2, fails because the conversions lead to pixel loss
-    @Tag("fails")
     @Property
     void testPngToPdfToPng() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -74,7 +73,6 @@ public class PropertyTests {
     }
 
     //checks property that when img1->pdf->img2 then ideally img1=img2, fails because the conversions lead to pixel loss
-    @Tag("fails")
     @Property
     void testJpegToPdfToJpeg() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -92,7 +90,6 @@ public class PropertyTests {
     }
 
     //checks property that when img1->pdf->img2 then ideally img1=img2, fails because the conversions lead to pixel loss
-    @Tag("fails")
     @Property
     void testTifToPdfToTif() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

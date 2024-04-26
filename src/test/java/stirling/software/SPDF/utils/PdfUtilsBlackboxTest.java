@@ -37,22 +37,15 @@ import java.io.IOException;
 import java.util.stream.StreamSupport;
 
 public class PdfUtilsBlackboxTest {
-    private static PDDocument txtAndImg;
-    private static PDDocument imgOnly;
     private static PDDocument txtOnly;
-    private static PDDocument multiPage;
-    private static PDDocument empty;
 
     private static byte[] imageBytes;
 
     @BeforeAll
     public static void setup() {
         try {
-            txtAndImg = Loader.loadPDF(new File("testFiles/inputs/txtAndImg.pdf"));
-            imgOnly = Loader.loadPDF(new File("testFiles/inputs/imgOnly.pdf"));
+
             txtOnly = Loader.loadPDF(new File("testFiles/inputs/txtOnly.pdf"));
-            multiPage = Loader.loadPDF(new File("testFiles/inputs/multiPage.pdf"));
-            empty = Loader.loadPDF(new File("testFiles/inputs/empty.pdf"));
 
             try (PDDocument doc = new PDDocument()) {
                 PDImageXObject image1 = PDImageXObject.createFromFile("testFiles/inputs/blue.png", doc);
