@@ -232,40 +232,6 @@ public class PdfUtilsWhiteboxTest {
                 fail(ex.toString());
             }
         }
-
-        private static void createPDFWithFormXObject() {
-            try {
-                PDDocument doc = new PDDocument();
-                PDPage page = new PDPage();
-                doc.addPage(page);
-
-                // Create a PDFormXObject
-                PDFormXObject formXObject = new PDFormXObject(doc);
-
-                // Add images to the formXObject
-                PDImageXObject img = PDImageXObject.createFromFile("testFiles/inputs/blue.png", doc);
-                PDPageContentStream contentStream = new PDPageContentStream(doc, page);
-                BufferedImage buf = img.getImage();
-
-                // Convert BufferedImage to byte array
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ImageIO.write(buf, "png", baos);
-                PDImageXObject pdImage = PDImageXObject.createFromByteArray(doc, baos.toByteArray(), "image");
-                contentStream.drawImage(pdImage, 50, 50);
-
-                // Add the formXObject to the page's resources
-                PDResources resources = new PDResources();
-                resources.put(COSName.getPDFName("FormXObject"), formXObject);
-
-                page.setResources(resources);
-                PdfUtils.getAllImages(page.getResources());
-
-                // Save the document
-//                document.save(filePath);
-            } catch (Exception ex) {
-                fail(ex.toString());
-            }
-        }
     }
 
     @Nested
