@@ -1,5 +1,10 @@
 package stirling.software.SPDF.utils;
 
+import net.jqwik.api.Example;
+import net.jqwik.api.Group;
+import net.jqwik.api.Property;
+import net.jqwik.api.lifecycle.BeforeContainer;
+import net.jqwik.api.lifecycle.BeforeTry;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -106,7 +111,6 @@ public class PdfUtilsBlackboxTest {
         // nonempty pdf file with content but no Image
         // file with only 1 image
         // file with more than 1 image
-
         static Stream<Arguments> resourceProvider() throws IOException {
             return Stream.of(
                     Arguments.of(createEmptyResources(), 0),
@@ -115,7 +119,6 @@ public class PdfUtilsBlackboxTest {
                     Arguments.of(createResourcesWithTwoImages(), 2)
             );
         }
-
         @ParameterizedTest
         @MethodSource(value = "resourceProvider")
         void testGetAllImages(PDResources resources, int numImages) {
@@ -423,19 +426,5 @@ public class PdfUtilsBlackboxTest {
                }
            }
        }
-
-
-       //add tests for
-       //addImageToDocument
-       //overlayImage
-
-
-
-
-
-
-
-
-   }
-
+    }
 }

@@ -166,6 +166,11 @@ dependencies {
 
     implementation 'jakarta.persistence:jakarta.persistence-api:2.2.3'
 
+
+    //jqwik
+    testImplementation 'net.jqwik:jqwik-api:1.5.1'
+    testRuntimeOnly 'net.jqwik:jqwik-engine:1.5.1'
+
 }
 
 tasks.withType(JavaCompile) {
