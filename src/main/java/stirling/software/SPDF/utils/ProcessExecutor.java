@@ -208,7 +208,7 @@ public class ProcessExecutor {
         return new ProcessExecutorResult(exitCode, messages);
     }
 
-    public class ProcessExecutorResult {
+    public static class ProcessExecutorResult {
         int rc;
         String messages;
 
