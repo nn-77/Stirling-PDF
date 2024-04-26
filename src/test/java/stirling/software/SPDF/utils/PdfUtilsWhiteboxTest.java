@@ -675,7 +675,7 @@ public class PdfUtilsWhiteboxTest {
             }
         }
 
-        // Above test passes if we don't specify PDF!
+        // Above test passes if we don't specify JPEG!
         @Tag("Presentation")
         @Test
         public void testUnspecifiedToPdf() {
