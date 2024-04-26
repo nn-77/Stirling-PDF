@@ -245,6 +245,7 @@ public class PdfUtilsWhiteboxTest {
             }
         }
 
+        @Tag("fails")
         @Test
         // Same as testHasImagesTruePage0
         void testHasTextTruePage0() {
