@@ -37,22 +37,15 @@ import java.io.IOException;
 import java.util.stream.StreamSupport;
 
 public class PdfUtilsBlackboxTest {
-    private static PDDocument txtAndImg;
-    private static PDDocument imgOnly;
     private static PDDocument txtOnly;
-    private static PDDocument multiPage;
-    private static PDDocument empty;
 
     private static byte[] imageBytes;
 
     @BeforeAll
     public static void setup() {
         try {
-            txtAndImg = Loader.loadPDF(new File("testFiles/inputs/txtAndImg.pdf"));
-            imgOnly = Loader.loadPDF(new File("testFiles/inputs/imgOnly.pdf"));
+
             txtOnly = Loader.loadPDF(new File("testFiles/inputs/txtOnly.pdf"));
-            multiPage = Loader.loadPDF(new File("testFiles/inputs/multiPage.pdf"));
-            empty = Loader.loadPDF(new File("testFiles/inputs/empty.pdf"));
 
             try (PDDocument doc = new PDDocument()) {
                 PDImageXObject image1 = PDImageXObject.createFromFile("testFiles/inputs/blue.png", doc);
@@ -182,7 +175,7 @@ public class PdfUtilsBlackboxTest {
             );
         }
 
-        @Tag("fails") //for 1st input because resources are null
+        @Tag("fails") //for 1st input because resources are null in a blank page
         @ParameterizedTest
         @MethodSource("pageImageProvider")
         void testHasImagesOnPage(PDPage page, boolean expected) {
@@ -316,7 +309,7 @@ public class PdfUtilsBlackboxTest {
                    Arguments.of(createDocumentWithPageSize(PDRectangle.LEGAL), formatSize(PDRectangle.LEGAL), true)
            );
        }
-       @Tag("fails") //for all sizes A*, difference in exp and actual is always <1.0 for example exp width 2384.0 and actual width 2383.937
+       @Tag("fails") //for all sizes A*, difference between exp and actual is always <1.0 for example exp width 2384.0 and actual width 2383.937
        @ParameterizedTest
        @MethodSource("pageSizeProvider")
        void testPageSize(PDDocument document, String expectedPageSize, boolean expected) throws IOException {
@@ -371,8 +364,8 @@ public class PdfUtilsBlackboxTest {
                    Arguments.of(txtPdf, "png", ImageType.GRAY, true, 150, "txtPagePng")
            );
        }
-       //need to update test to check for more
-       @Tag("notdone")
+
+       //moe robust testing for this was done manually, also in the whitebox tests and in the property tests, because it's hard to compare pdf and img equality with assertions
        @ParameterizedTest
        @MethodSource("pdfConversionProvider")
        void testConvertFromPdf(byte[] pdfData, String imageType, ImageType colorType, boolean singleImage, int DPI, String filename) throws IOException, Exception {
@@ -382,9 +375,6 @@ public class PdfUtilsBlackboxTest {
        }
 
 
-
-
-       //need to check test cases and update test checks
        public static Stream<Arguments> provideImageToPdfArguments() throws IOException {
            MockMultipartFile mockFileSingle = new MockMultipartFile("blue.png", "blue.png", "image/png", imageBytes);
 
@@ -399,7 +389,7 @@ public class PdfUtilsBlackboxTest {
            );
        }
 
-       @Tag("notdone")
+       @Tag("fails") //fails when turning jpeg to pdf, conversion is lossy
        @ParameterizedTest
        @MethodSource("provideImageToPdfArguments")
        void testImageToPdfConversion(MultipartFile[] files, String fitOption, boolean autoRotate, String colorType) throws IOException {
