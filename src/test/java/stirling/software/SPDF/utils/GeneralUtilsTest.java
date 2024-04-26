@@ -50,22 +50,17 @@ public class GeneralUtilsTest {
         @ParameterizedTest
         @MethodSource("fileProvider")
         void testConvertMultipartFileToFile(MultipartFile multipartFile) throws IOException {
-            // Act
-            File resultFile = GeneralUtils.convertMultipartFileToFile(multipartFile);
 
-            // Assert
+            File resultFile = GeneralUtils.convertMultipartFileToFile(multipartFile);
             assertNotNull(resultFile);
             assertTrue(resultFile.exists());
             assertEquals(multipartFile.getSize(), resultFile.length());
 
-            // Read content from the result file to verify the integrity
             byte[] fileContent = new byte[(int) resultFile.length()];
             try (FileInputStream fis = new FileInputStream(resultFile)) {
                 fis.read(fileContent);
             }
             assertArrayEquals(multipartFile.getBytes(), fileContent);
-
-            // Cleanup
             resultFile.delete();
         }
 
@@ -121,13 +116,19 @@ public class GeneralUtilsTest {
             });
         }
 
+        //equivalence classes and possible fail cases
+        // An empty directory
+        // Directory with some files
+        // Nested directories with files
+        // Directory containing read-only files
+        // Directory with symbolic links
         private static Stream<Path> provideTestDirsDelete() {
             return Stream.of(
-                    Paths.get("empty_dir"),           // An empty directory
-                    Paths.get("with_files"),          // Directory with some files
-                    Paths.get("nested_directories"),  // Nested directories with files
-                    Paths.get("read_only_files"),     // Directory containing read-only files
-                    Paths.get("linked_files")         // Directory with symbolic links
+                    Paths.get("empty_dir"),
+                    Paths.get("with_files"),
+                    Paths.get("nested_directories"),
+                    Paths.get("read_only_files"),
+                    Paths.get("linked_files")
             );
         }
         @ParameterizedTest
@@ -139,10 +140,13 @@ public class GeneralUtilsTest {
         }
 
 
+        //equivalence classes
+        //directory that exists
+        //directory that doesn't exist
         private static Stream<String> provideTestDirsCreate() {
             return Stream.of(
-                    "empty_dir",              // A directory that already exists
-                    "new_dir"                         // A directory that does not exist
+                    "empty_dir",
+                    "new_dir"
             );
         }
         @ParameterizedTest
@@ -155,7 +159,6 @@ public class GeneralUtilsTest {
         }
 
 
-        @Tag("fails") //throws npe when string null
         public static Stream<Arguments> provideFileNameScenarios() {
             return Stream.of(
                     Arguments.of("filename", "filename"),
@@ -171,6 +174,7 @@ public class GeneralUtilsTest {
             );
         }
 
+        @Tag("fails") //throws npe when string null
         @ParameterizedTest
         @MethodSource("provideFileNameScenarios")
         void testConvertToFileName(String input, String expected) {
@@ -178,7 +182,7 @@ public class GeneralUtilsTest {
         }
 
 
-        @Tag("fails") //thinks urls with space in them, urls w invalid domain, with two dots, with ivalid protocola(ie not https) are valid,
+
         public static Stream<Arguments> provideUrlScenarios() {
             return Stream.of(
                     Arguments.of("https://example.com:80/path", true),
@@ -194,6 +198,7 @@ public class GeneralUtilsTest {
             );
         }
 
+        @Tag("fails") //thinks urls with space in them, urls w invalid domain, with two dots, with ivalid protocola(ie not https) are valid,
         @ParameterizedTest
         @MethodSource("provideUrlScenarios")
         void testIsValidURL(String url, boolean expected) {
@@ -279,7 +284,7 @@ public class GeneralUtilsTest {
 //                    Arguments.of("1,-2n", 5, true, List.of(1,2,4))           // coverage
             );
         }
-        @Tag("fails") //when "0,1,2" it should return [0,1,2] but returns [0,1], also just like it does with null, if input is invlaid it should default to just 1st page
+        @Tag("fails") //when "0,1,2" it should return [0,1,2] but returns [0,1], also just like it does with null, if input is invalid it should default to just 1st page
         @ParameterizedTest
         @MethodSource("providePageListScenarios")
         void testParsePageList(String input, int totalPages, boolean oneBased, List<Integer> expected) {
@@ -287,7 +292,7 @@ public class GeneralUtilsTest {
         }
 
 
-        @Tag("fails")//similar to previous fails
+
         public static Stream<Arguments> providePageListArrayScenarios() {
             return Stream.of(
                     Arguments.of(new String[] {"0", "1", "2"}, 5, List.of(0, 1, 2)),
@@ -301,6 +306,7 @@ public class GeneralUtilsTest {
             );
         }
 
+        @Tag("fails")//similar to previous test's fails
         @ParameterizedTest
         @MethodSource("providePageListArrayScenarios")
         void testParsePageListArray(String[] input, int totalPages, List<Integer> expected) {
@@ -326,7 +332,7 @@ public class GeneralUtilsTest {
             );
         }
 
-        @Tag("fails")// with cases like  Arguments.of(new String[] {"0-2", "4"}, 5, false, List.of(0, 1, 2, 4)), throws IllegalArgumentExceptionw when negative nums, throws npe when null
+        @Tag("fails")// fails with cases like  Arguments.of(new String[] {"0-2", "4"}, 5, false, List.of(0, 1, 2, 4)), throws IllegalArgumentExceptionw when negative nums, throws npe when null
         @ParameterizedTest
         @MethodSource("providePageListComplexScenarios")
         void testParsePageListComplex(String[] input, int totalPages, boolean oneBased, List<Integer> expected) {

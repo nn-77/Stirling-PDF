@@ -31,7 +31,7 @@ public class ErrorUtilsTest {
     @ParameterizedTest
     @MethodSource("provideExceptions")
     void testExceptionToModel(Exception exception) {
-        Model model = new ExtendedModelMap(); // Using ExtendedModelMap which implements Model
+        Model model = new ExtendedModelMap();
         Model returnedModel = ErrorUtils.exceptionToModel(model, exception);
 
         assertEquals(model, returnedModel, "The returned model should be the same as the input model.");
