@@ -55,6 +55,7 @@ public class PropertyTests {
         }
     }
 
+    //checks property that when img1->pdf->img2 then ideally img1=img2, fails because the conversions lead to pixel loss
     @Tag("fails")
     @Property
     void testPngToPdfToPng() throws Exception {
@@ -72,6 +73,7 @@ public class PropertyTests {
         Assertions.assertTrue(areImagesEqual(originalPng, resultImage));
     }
 
+    //checks property that when img1->pdf->img2 then ideally img1=img2, fails because the conversions lead to pixel loss
     @Tag("fails")
     @Property
     void testJpegToPdfToJpeg() throws Exception {
@@ -89,6 +91,7 @@ public class PropertyTests {
         Assertions.assertTrue(areImagesEqual(originalJpeg, resultImage));
     }
 
+    //checks property that when img1->pdf->img2 then ideally img1=img2, fails because the conversions lead to pixel loss
     @Tag("fails")
     @Property
     void testTifToPdfToTif() throws Exception {
