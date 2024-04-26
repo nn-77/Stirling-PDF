@@ -3,9 +3,13 @@ package stirling.software.SPDF.utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.rendering.ImageType;
 import org.junit.jupiter.api.*;
@@ -73,6 +77,7 @@ public class PdfUtilsWhiteboxTest {
     private static PDDocument imgOnly;
     private static PDDocument txtOnly;
     private static PDDocument multiPage;
+    private static PDDocument empty;
     private static final String conversionPath = "testFiles/outputs/";
 
     @BeforeEach
@@ -82,6 +87,7 @@ public class PdfUtilsWhiteboxTest {
             imgOnly = Loader.loadPDF(new File("testFiles/inputs/imgOnly.pdf"));
             txtOnly = Loader.loadPDF(new File("testFiles/inputs/txtOnly.pdf"));
             multiPage = Loader.loadPDF(new File("testFiles/inputs/multiPage.pdf"));
+            empty = Loader.loadPDF(new File("testFiles/inputs/empty.pdf"));
         } catch (IOException ex) {
             fail("Could not complete test setup");
         }
@@ -113,8 +119,6 @@ public class PdfUtilsWhiteboxTest {
     @Nested
     class Image {
         @Test
-            // Need to improve branch coverage
-            // Can't get fonts to show up in resources
         void testGetAllImages() {
             PDDocument doc = new PDDocument();
             doc.addPage(new PDPage());
@@ -125,7 +129,7 @@ public class PdfUtilsWhiteboxTest {
                 PDPage page = txtAndImg.getPage(0);
                 List<RenderedImage> imgList = PdfUtils.getAllImages(page.getResources());
                 BufferedImage buf1 = img.getImage();
-                BufferedImage buf2 = (BufferedImage) PdfUtils.getAllImages(page.getResources()).get(0);
+                BufferedImage buf2 = (BufferedImage) imgList.get(0);
 
                 assertEquals(1, imgList.size());
                 assertTrue(imageEquals(buf1, buf2));
@@ -135,7 +139,48 @@ public class PdfUtilsWhiteboxTest {
         }
 
         @Test
-            // Fault? NPE if no resources
+        // Must manually create PDF to add FormXObject
+        void testGetAllImagesForm() {
+            try {
+                PDDocument doc = new PDDocument();
+                PDPage page = new PDPage();
+                doc.addPage(page);
+
+                // Create a PDFormXObject
+                PDFormXObject formXObject = new PDFormXObject(doc);
+                PDResources formResources = new PDResources();
+
+                // Add an image to the formXObject
+                PDImageXObject img = PDImageXObject.createFromFile("testFiles/inputs/blue.png", doc);
+                PDPageContentStream contentStream = new PDPageContentStream(doc, page);
+                BufferedImage buf = img.getImage();
+
+                // Convert BufferedImage to byte array and draw image
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(buf, "png", baos);
+                PDImageXObject pdImage = PDImageXObject.createFromByteArray(doc, baos.toByteArray(), "image");
+                contentStream.drawImage(pdImage, 50, 50);
+                formResources.put(COSName.getPDFName("ImageXObject"), pdImage);
+                formXObject.setResources(formResources);
+
+                // Add the formXObject to the page's resources
+                PDResources pageResources = new PDResources();
+                pageResources.put(COSName.getPDFName("FormXObject"), formXObject);
+                page.setResources(pageResources);
+
+                List<RenderedImage> imgList = PdfUtils.getAllImages(page.getResources());
+                BufferedImage buf1 = img.getImage();
+                BufferedImage buf2 = (BufferedImage) imgList.get(0);
+
+                assertEquals(1, imgList.size());
+                assertTrue(imageEquals(buf1, buf2));
+            } catch (Exception ex) {
+                fail(ex.toString());
+            }
+
+        }
+
+        @Test
         void testHasImagesFalse() {
             try {
                 assertFalse(PdfUtils.hasImages(txtOnly, "all"));
@@ -144,8 +189,11 @@ public class PdfUtilsWhiteboxTest {
             }
         }
 
+        @Tag("fails")
         @Test
-            // Fault? NPE if no resources
+        // Found fault when inputting "0" as page to check, trace back to generalUtils line 220
+        // hasImage seems very inefficient by calling getPage multiple times (which calls getPages under the hood)
+        // Note we use 1 based pages from here on for these functions
         void testHasImagesTrue() {
             try {
                 assertTrue(PdfUtils.hasImages(imgOnly, "all"));
@@ -154,9 +202,20 @@ public class PdfUtilsWhiteboxTest {
             }
         }
 
+        @Tag("fails")
         @Test
-            // Found fault when inputting "0" as page to check, trace back to generalUtils line 220
-            // hasImage seems very inefficient by calling getPage multiple times (which calls getPages under the hood)
+        // Found fault when inputting "0" as page to check, trace back to generalUtils line 220
+        // hasImage seems very inefficient by calling getPage multiple times (which calls getPages under the hood)
+        // Note we use 1 based pages from here on for these functions
+        void testHasImagesTruePage0() {
+            try {
+                assertTrue(PdfUtils.hasImages(imgOnly, "0"));
+            } catch (IOException ex) {
+                fail(ex.toString());
+            }
+        }
+
+        @Test
         void testHasImagesOnPageFalse() {
             try {
                 assertFalse(PdfUtils.hasImagesOnPage(txtOnly.getPage(0)));
@@ -173,6 +232,40 @@ public class PdfUtilsWhiteboxTest {
                 fail(ex.toString());
             }
         }
+
+        private static void createPDFWithFormXObject() {
+            try {
+                PDDocument doc = new PDDocument();
+                PDPage page = new PDPage();
+                doc.addPage(page);
+
+                // Create a PDFormXObject
+                PDFormXObject formXObject = new PDFormXObject(doc);
+
+                // Add images to the formXObject
+                PDImageXObject img = PDImageXObject.createFromFile("testFiles/inputs/blue.png", doc);
+                PDPageContentStream contentStream = new PDPageContentStream(doc, page);
+                BufferedImage buf = img.getImage();
+
+                // Convert BufferedImage to byte array
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(buf, "png", baos);
+                PDImageXObject pdImage = PDImageXObject.createFromByteArray(doc, baos.toByteArray(), "image");
+                contentStream.drawImage(pdImage, 50, 50);
+
+                // Add the formXObject to the page's resources
+                PDResources resources = new PDResources();
+                resources.put(COSName.getPDFName("FormXObject"), formXObject);
+
+                page.setResources(resources);
+                PdfUtils.getAllImages(page.getResources());
+
+                // Save the document
+//                document.save(filePath);
+            } catch (Exception ex) {
+                fail(ex.toString());
+            }
+        }
     }
 
     @Nested
@@ -181,6 +274,16 @@ public class PdfUtilsWhiteboxTest {
         void testHasTextTrue() {
             try {
                 assertTrue(PdfUtils.hasText(txtOnly, "all", "text"));
+            } catch (IOException ex) {
+                fail(ex.toString());
+            }
+        }
+
+        @Test
+        // Same as testHasImagesTruePage0
+        void testHasTextTruePage0() {
+            try {
+                assertTrue(PdfUtils.hasText(txtOnly, "0", "text"));
             } catch (IOException ex) {
                 fail(ex.toString());
             }
@@ -232,7 +335,6 @@ public class PdfUtilsWhiteboxTest {
         }
 
         @Test
-            // bug about index 0 page
         void testContainsTextFileSinglePageTrue() {
             try {
                 assertTrue(PdfUtils.containsTextInFile(multiPage, "text", "4"));
@@ -242,7 +344,6 @@ public class PdfUtilsWhiteboxTest {
         }
 
         @Test
-            // bug about index 0 page
         void testContainsTextFileRangeFalse() {
             try {
                 assertFalse(PdfUtils.containsTextInFile(multiPage, "text", "1-2, 3"));
@@ -252,7 +353,6 @@ public class PdfUtilsWhiteboxTest {
         }
 
         @Test
-            // bug about index 0 page
         void testContainsTextFileFalse() {
             try {
                 assertFalse(PdfUtils.containsTextInFile(txtOnly, "not present", "0"));
@@ -393,6 +493,7 @@ public class PdfUtilsWhiteboxTest {
             }
         }
 
+        @Tag("Presentation")
         @Test
         // multi-paged but single image
         public void testConvertTIFSingle() {
@@ -464,7 +565,7 @@ public class PdfUtilsWhiteboxTest {
 
     @Nested
     class ConvertToPdf {
-        // This approach is close to each choice coverage -- the goal here is to optimize for statment coverage
+        // This approach is close to each choice coverage -- the goal here is to optimize for statement coverage
         @Test
         public void testPNGToPdf() {
             try {
@@ -480,7 +581,7 @@ public class PdfUtilsWhiteboxTest {
                 PDPage page = generatedPDF.getPage(0);
                 List<RenderedImage> imgList = PdfUtils.getAllImages(page.getResources());
                 BufferedImage buf1 = img.getImage();
-                BufferedImage buf2 = (BufferedImage) PdfUtils.getAllImages(page.getResources()).get(0);
+                BufferedImage buf2 = (BufferedImage) imgList.get(0);
 
                 assertEquals(1, imgList.size());
                 assertTrue(imageEquals(buf1, buf2));
@@ -507,7 +608,7 @@ public class PdfUtilsWhiteboxTest {
 
                 PDPage page = generatedPDF.getPage(0);
                 List<RenderedImage> imgList = PdfUtils.getAllImages(page.getResources());
-                BufferedImage img = (BufferedImage) PdfUtils.getAllImages(page.getResources()).get(0);
+                BufferedImage img = (BufferedImage) imgList.get(0);
 
                 assertEquals(1, imgList.size());
                 assertEquals(BufferedImage.TYPE_BYTE_BINARY, img.getType());
@@ -531,7 +632,7 @@ public class PdfUtilsWhiteboxTest {
 
                 PDPage page = generatedPDF.getPage(0);
                 List<RenderedImage> imgList = PdfUtils.getAllImages(page.getResources());
-                BufferedImage img = (BufferedImage) PdfUtils.getAllImages(page.getResources()).get(0);
+                BufferedImage img = (BufferedImage) imgList.get(0);
 
                 assertEquals(1, imgList.size());
                 assertEquals(BufferedImage.TYPE_BYTE_GRAY, img.getType());
@@ -582,6 +683,7 @@ public class PdfUtilsWhiteboxTest {
         // regular LossLessFactory may be more reliable than JPEGFactory for jpegs...
         // We consider this another "semi-fault". There is likely some loss in the JPEG conversion, but it seems
         // too minuscule to be considered practically relevant, by the manual inspection.
+        @Tag("Presentation")
         @Tag("fails")
         @Test
         public void testJPEGToPdf() {
@@ -598,7 +700,7 @@ public class PdfUtilsWhiteboxTest {
                 PDPage page = generatedPDF.getPage(0);
                 List<RenderedImage> imgList = PdfUtils.getAllImages(page.getResources());
                 BufferedImage buf1 = img.getImage();
-                BufferedImage buf2 = (BufferedImage) PdfUtils.getAllImages(page.getResources()).get(0);
+                BufferedImage buf2 = (BufferedImage) imgList.get(0);
 
                 assertEquals(1, imgList.size());
                 assertTrue(imageEquals(buf1, buf2));
@@ -607,6 +709,8 @@ public class PdfUtilsWhiteboxTest {
             }
         }
 
+        // Above test passes if we don't specify PDF!
+        @Tag("Presentation")
         @Test
         public void testUnspecifiedToPdf() {
             try {
@@ -622,7 +726,7 @@ public class PdfUtilsWhiteboxTest {
                 PDPage page = generatedPDF.getPage(0);
                 List<RenderedImage> imgList = PdfUtils.getAllImages(page.getResources());
                 BufferedImage buf1 = img.getImage();
-                BufferedImage buf2 = (BufferedImage) PdfUtils.getAllImages(page.getResources()).get(0);
+                BufferedImage buf2 = (BufferedImage) imgList.get(0);
 
                 assertEquals(1, imgList.size());
                 assertTrue(imageEquals(buf1, buf2));
@@ -737,7 +841,7 @@ public class PdfUtilsWhiteboxTest {
 
         @Test
         // Overlay on every page for a document with only one page
-        public void grtestOverlaySinglePageAll() {
+        public void testOverlaySinglePageAll() {
             try {
                 // Copy pdf
                 byte[] bytes = FileUtils.readFileToByteArray(new File("testFiles/inputs/imgOnly.pdf"));
