@@ -77,7 +77,6 @@ public class PdfUtilsWhiteboxTest {
     private static PDDocument imgOnly;
     private static PDDocument txtOnly;
     private static PDDocument multiPage;
-    private static PDDocument empty;
     private static final String conversionPath = "testFiles/outputs/";
 
     @BeforeEach
@@ -87,7 +86,6 @@ public class PdfUtilsWhiteboxTest {
             imgOnly = Loader.loadPDF(new File("testFiles/inputs/imgOnly.pdf"));
             txtOnly = Loader.loadPDF(new File("testFiles/inputs/txtOnly.pdf"));
             multiPage = Loader.loadPDF(new File("testFiles/inputs/multiPage.pdf"));
-            empty = Loader.loadPDF(new File("testFiles/inputs/empty.pdf"));
         } catch (IOException ex) {
             fail("Could not complete test setup");
         }
@@ -189,7 +187,6 @@ public class PdfUtilsWhiteboxTest {
             }
         }
 
-        @Tag("fails")
         @Test
         // Found fault when inputting "0" as page to check, trace back to generalUtils line 220
         // hasImage seems very inefficient by calling getPage multiple times (which calls getPages under the hood)
